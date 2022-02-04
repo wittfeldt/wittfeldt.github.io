@@ -1,0 +1,137 @@
+<html>
+  <head>
+    <title>Lolo Tram Tracker</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <style>
+      #map {
+        height: 100%;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initApp&v=weekly&channel=2"
+      async
+    >
+    </script>
+    <script>
+      let ws, map, markers = {};
+
+      function initApp() {
+        ws = new WebSocket("wss://dev.lolo.company/vZGyR24gxpDSifoRYxoez9/ws");
+
+        ws.onopen = function(ev) {
+          console.log('ws open');
+          initMap();
+        };
+
+        ws.onerror = function(ev) {
+          alert('Websocket error');
+        }
+      }
+
+      function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 16,
+          minZoom: 16,
+          center: { lat: 57.70609407858215, lng: 11.970031873752204 },
+        });
+
+        map.addListener('idle', () => {
+          ws.send(JSON.stringify(map.getBounds()));
+        });
+
+        ws.onmessage = function(msg) {
+
+          try {
+            for (const { id, position, title, name, rotation, bgColor } of JSON.parse(msg.data)) {
+              let marker = markers[id];
+
+              if (marker) {
+                marker.animateTo(position);
+
+              } else {
+                const m = name.match(/^Spå ([0-9]+)$/);
+                
+                const svg = m ?
+                  tramSvg(m[1], bgColor) :
+                  busSvg(name, bgColor);
+
+                marker = new google.maps.Marker({
+                  position, 
+                  map, 
+                  title,
+                  icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+                    origin: new google.maps.Point(0,0),
+                    anchor: new google.maps.Point(0, 0)
+                  }
+                });
+
+                marker.animateTo = function(newPos) {
+                  clearInterval(this._ivt);
+
+                  if (this._newPos) this.setPosition(this._newPos);
+                  this._newPos = newPos;
+
+                  const currPos = this.getPosition();
+                  let i = 0;
+
+                  const dLat = (newPos.lat - currPos.lat()) / 50;
+                  const dLng = (newPos.lng - currPos.lng()) / 50;
+
+                  this._ivt = setInterval(() => {
+                    i++;                
+                    this.setPosition(new google.maps.LatLng(
+                      currPos.lat() + dLat * i,
+                      currPos.lng() + dLng * i
+                    ));
+                  }, 100);
+                }
+
+                markers[id] = marker;
+              }
+            }
+
+          } catch (err) {
+            console.error(err);
+          }
+        };
+      }
+
+      function tramSvg(text, bgColor) {
+        const textX = text.length > 1 ? 4 : 10;
+
+        return `
+          <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+           <g id="Layer_1">
+            <rect rx="8" stroke-width="0" stroke="#000" height="32" width="32" y="0" x="0" fill="${bgColor}"/>
+            <text font-family="Caladea" font-size="24" y="24" x="${textX}" stroke-width="0" stroke="#000" fill="#ffffff">${text}</text>
+           </g>
+          </svg>
+        `;
+      }
+
+      function busSvg(text, bgColor) {
+        const rows = text.split(' ');
+
+        return `
+          <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+           <g id="Layer_1">
+            <rect rx="8" stroke-width="0" stroke="#000" height="32" width="32" y="0" x="0" fill="${bgColor}"/>
+            <text font-family="Caladea" font-size="13" y="14" x="4" stroke-width="0" stroke="#000" fill="#ffffff">${rows[0]}</text>
+            <text font-family="Caladea" font-size="13" y="26" x="4" stroke-width="0" stroke="#000" fill="#ffffff">${rows[1]}</text>
+           </g>
+          </svg>
+        `;
+      }
+    </script>
+  </body>
+</html>
