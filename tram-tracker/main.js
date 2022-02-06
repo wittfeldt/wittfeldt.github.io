@@ -5,6 +5,7 @@ import { getIcon } from './modules/icons.js';
 const markers = {}; // markers by id
 
 const ws = new WebSocket("wss://dev.lolo.company/vZGyR24gxpDSifoRYxoez9/ws");
+await ws.open();
 
 const map = new google.maps.Map(document.getElementById("map"), {
   zoom: 16,

@@ -1,13 +1,19 @@
 class JsonWebSocket extends WebSocket {
   constructor(...args) {
     super(...args);
-    this.onopen = function(ev) {
-      console.log('ws open');
-    };
 
     this.onerror = function(ev) {
       alert('Websocket error');
     }
+  }
+
+  open() {
+    return new Promise(resolve => {
+      this.onopen = function(ev) {
+        console.log('ws open');
+        resolve();
+      };
+    })
   }
 
   send(obj) {
