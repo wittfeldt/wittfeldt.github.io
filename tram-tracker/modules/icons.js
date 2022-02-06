@@ -5,8 +5,15 @@ const tram = (text, bgColor) => {
   return `
     <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
      <g>
-      <rect rx="8" stroke-width="0" stroke="#000" height="32" width="32" y="0" x="0" fill="${bgColor}"/>
-      <text font-family="Caladea" font-size="24" y="24" x="${textX}" stroke-width="0" fill="${textColor}">${text}</text>
+      <rect
+        rx="8" stroke-width="0" stroke="#000" height="32" width="32" 
+        y="0" x="0" fill="${bgColor}"
+      />
+      <text 
+        font-family="Caladea" font-size="24" y="24" x="${textX}" 
+        stroke-width="0" fill="${textColor}">
+        ${text}
+      </text>
      </g>
     </svg>
   `;
@@ -19,9 +26,20 @@ const other = (text, bgColor) => {
   return `
     <svg width="32" height="32" xmlns="http://www.w3.org/2000/svg">
      <g>
-      <rect rx="8" stroke-width="0" stroke="#000" height="32" width="32" y="0" x="0" fill="${bgColor}"/>
-      <text font-family="Caladea" font-size="13" y="14" x="4" stroke-width="0" fill="${textColor}">${rows[0]}</text>
-      <text font-family="Caladea" font-size="13" y="26" x="4" stroke-width="0" fill="${textColor}">${rows[1]}</text>
+      <rect
+        rx="8" stroke-width="0" stroke="#000" height="32" width="32" 
+        y="0" x="0" fill="${bgColor}"
+      />
+      <text 
+        font-family="Caladea" font-size="13" y="14" x="4" 
+        stroke-width="0" fill="${textColor}">
+        ${rows[0]}
+      </text>
+      <text
+        font-family="Caladea" font-size="13" y="26" x="4" 
+        stroke-width="0" fill="${textColor}">
+        ${rows[1]}
+      </text>
      </g>
     </svg>
   `;
